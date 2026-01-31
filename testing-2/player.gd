@@ -23,12 +23,13 @@ const STAMINA_COSTS = {
 const STAMINA_REGEN = 10.0
 
 # --- State Machine ---
-enum State { IDLE, MOVE, JUMP }
+enum State { IDLE, MOVE, JUMP, ROLL, ATTACK, BLOCK }
 var current_state = State.IDLE
 
 # --- State Variables ---
 var stamina: float = 100.0
 var max_stamina: float = 100.0
+var is_exhausted: bool = false
 
 # --- Z-Axis & Visuals ---
 var z_height: float = 0.0
@@ -53,14 +54,14 @@ func to_isometric(dir: Vector2) -> Vector2:
     return Vector2(dir.x - dir.y, (dir.x + dir.y) * 0.5)
 
 func _physics_process(delta: float) -> void:
-    # 1. Global Input (Camera is always active)
+    # Global Input
     handle_camera(delta)
     
-    # 2. Movement Input
+    # Movement Input
     var input_dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")
     var iso_dir = to_isometric(input_dir)
     
-    # 3. State Machine Logic
+    # === State Machine Logic ===
     match current_state:
         State.IDLE:
             handle_idle_state(iso_dir, delta)
@@ -68,28 +69,35 @@ func _physics_process(delta: float) -> void:
             handle_move_state(iso_dir, delta)
         State.JUMP:
             handle_jump_state(iso_dir, delta)
-
-    # 4. Apply Physics (Slide)
+        State.ROLL:
+            handle_roll_state(iso_dir, delta)
+        State.ATTACK:
+            handle_attack_state(iso_dir, delta)
+        State.BLOCK:
+            handle_block_state(iso_dir, delta)
+    # === End State Machine Logic ===
+    
+    # Apply Physics (Slide)
     move_and_slide()
     
-    # 5. Global Visual Updates (Facing, Z-Axis, UI)
+    # Global Visual Updates (Facing, Z-Axis, UI)
     update_visuals(iso_dir, delta)
     update_ui()
 
 # --- State Functions ---
 
 func handle_idle_state(dir: Vector2, delta: float) -> void:
-    # Transition: If input detected, switch to MOVE
+    # Transition: If input, switch to MOVE
     if dir != Vector2.ZERO:
         current_state = State.MOVE
         return
 
-    # Transition: If Jump pressed, switch to JUMP
+    # Transition: Jump
     if Input.is_action_just_pressed("move_jump") and try_deduct_stamina("jump"):
         start_jump()
         return
 
-    # Behavior: Friction stops the player
+    # Apply Friction
     velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
     handle_regen(delta)
 
@@ -98,23 +106,25 @@ func handle_move_state(dir: Vector2, delta: float) -> void:
     if dir == Vector2.ZERO:
         current_state = State.IDLE
         return
-        
-    # Transition: If Jump pressed, switch to JUMP
+
+    # Transition: Jump
     if Input.is_action_just_pressed("move_jump") and try_deduct_stamina("jump"):
         start_jump()
         return
 
-    # Behavior: Handle Sprinting
     var current_speed = BASE_SPEED
-    
-    # 1. Check if the player WANTS to sprint
-    if Input.is_action_pressed("move_fast"):
-        # 2. Check if they CAN sprint
+
+    # Stamina Exhaustion Logic
+    if stamina <= 0:
+        is_exhausted = true
+    elif stamina >= max_stamina * 0.15:
+        is_exhausted = false
+
+
+    if Input.is_action_pressed("move_fast") and not is_exhausted:
         if stamina > 0:
             current_speed *= SPRINT_MULTIPLIER
             drain_stamina("sprint", delta)
-        else:
-            pass 
     else:
         handle_regen(delta)
 
@@ -122,7 +132,7 @@ func handle_move_state(dir: Vector2, delta: float) -> void:
 
 func handle_jump_state(dir: Vector2, delta: float) -> void:
     var current_speed = BASE_SPEED
-    if Input.is_action_pressed("move_fast"):
+    if Input.is_action_pressed("move_fast") and not is_exhausted:
         current_speed *= SPRINT_MULTIPLIER
     
     if dir != Vector2.ZERO:
@@ -139,6 +149,15 @@ func handle_jump_state(dir: Vector2, delta: float) -> void:
         z_height = 0
         z_velocity = 0
         current_state = State.IDLE # Return to ground state
+
+func handle_roll_state(dir: Vector2, delta: float) -> void:
+    pass
+
+func handle_attack_state(dir: Vector2, delta: float) -> void:
+    pass
+
+func handle_block_state(dir: Vector2, delta: float) -> void:
+    pass
 
 # --- Visuals & Helpers ---
 
@@ -157,19 +176,15 @@ func update_visuals(dir: Vector2, delta: float) -> void:
     var bob_offset = 0
     if current_state == State.MOVE:
         bob_time += delta * BOB_FREQUENCY
-        # Sin wave gives us -1 to 1. We multiply by Amplitude.
-        # abs() makes it a "bounce" (half circle) instead of up/down wave if desired
         bob_offset = sin(bob_time) * BOB_AMPLITUDE
     else:
-        # Reset bob time so next walk starts fresh
         bob_time = 0.0
 
     # 3. Combine Z-Height (Jump) and Bobbing (Walk)
-    # Note: z_height is usually negative (up), so we add them
     sprite.position.y = z_height - abs(bob_offset) 
 
 func update_facing_direction(dir: Vector2) -> void:
-    # Prioritize axis with stronger input (Isometric friendly)
+    # Prioritize axis with stronger input
     if abs(dir.x) > abs(dir.y):
         sprite.texture = TEX_RIGHT if dir.x > 0 else TEX_LEFT
     else:
