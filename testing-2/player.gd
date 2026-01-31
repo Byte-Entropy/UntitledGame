@@ -11,140 +11,187 @@ const SPRINT_MULTIPLIER = 2.0
 const FRICTION = 1200.0
 const CAM_SPEED = 500.0
 
+# --- Configuration: Animation (Bobbing) ---
+const BOB_FREQUENCY = 10.0  # How fast the bob is
+const BOB_AMPLITUDE = 3.0   # How many pixels up/down
+
 # --- Configuration: Stamina Costs ---
 const STAMINA_COSTS = {
-	"sprint": 25.0,
-	"jump": 20.0,
+    "sprint": 20.0,
+    "jump": 15.0,
 }
 const STAMINA_REGEN = 10.0
+
+# --- State Machine ---
+enum State { IDLE, MOVE, JUMP }
+var current_state = State.IDLE
 
 # --- State Variables ---
 var stamina: float = 100.0
 var max_stamina: float = 100.0
 
-# --- Z-Axis Simulation ---
+# --- Z-Axis & Visuals ---
 var z_height: float = 0.0
 var z_velocity: float = 0.0
+var bob_time: float = 0.0 # Tracks time for the sine wave
 const GRAVITY_Z = 980.0
 const JUMP_FORCE = 300.0
 
-# --- Preloaded Sprites (Auto-loaded from your folder) ---
-
+# --- Preloaded Sprites ---
 const TEX_UP = preload("res://PlayerSprites/up.png")
 const TEX_DOWN = preload("res://PlayerSprites/down.png")
 const TEX_LEFT = preload("res://PlayerSprites/left.png")
 const TEX_RIGHT = preload("res://PlayerSprites/right.png")
 
 func _ready() -> void:
-	# Safety Check: Print errors if nodes are missing
-	if not stamina_bar:
-		print("ERROR: Stamina Bar is not assigned in the Inspector!")
-	if not sprite:
-		# Fallback: Try to find it if not assigned
-		sprite = $Sprite2D
-		if not sprite: print("ERROR: Sprite2D node not found!")
+    if not stamina_bar: print("ERROR: Stamina Bar missing!")
+    if not sprite: 
+        sprite = $Sprite2D
+        if not sprite: print("ERROR: Sprite2D missing!")
 
 func to_isometric(dir: Vector2) -> Vector2:
-	# isometric projection: x' = x - y, y' = (x + y) / 2
-	return Vector2(dir.x - dir.y, (dir.x + dir.y) * 0.5)
+    return Vector2(dir.x - dir.y, (dir.x + dir.y) * 0.5)
 
 func _physics_process(delta: float) -> void:
-	# 1. Get Input
-	var direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	direction = to_isometric(direction) # Convert to isometric
+    # 1. Global Input (Camera is always active)
+    handle_camera(delta)
+    
+    # 2. Movement Input
+    var input_dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+    var iso_dir = to_isometric(input_dir)
+    
+    # 3. State Machine Logic
+    match current_state:
+        State.IDLE:
+            handle_idle_state(iso_dir, delta)
+        State.MOVE:
+            handle_move_state(iso_dir, delta)
+        State.JUMP:
+            handle_jump_state(iso_dir, delta)
 
-	# 2. Handle Actions (Sprint)
-	var is_sprinting = false
-	if direction != Vector2.ZERO and Input.is_action_pressed("move_fast"):
-		if stamina > 0:
-			is_sprinting = true
-			drain_stamina("sprint", delta)
+    # 4. Apply Physics (Slide)
+    move_and_slide()
+    
+    # 5. Global Visual Updates (Facing, Z-Axis, UI)
+    update_visuals(iso_dir, delta)
+    update_ui()
 
-	# 3. Handle Jump (move_jump)
-	if Input.is_action_just_pressed("move_jump") and z_height == 0:
-		if try_deduct_stamina("jump"):
-			z_velocity = -JUMP_FORCE 
+# --- State Functions ---
 
-	# 4. Apply Physics (Z-Axis Gravity)
-	handle_z_axis(delta)
+func handle_idle_state(dir: Vector2, delta: float) -> void:
+    # Transition: If input detected, switch to MOVE
+    if dir != Vector2.ZERO:
+        current_state = State.MOVE
+        return
 
-	# 5. Apply Movement (X/Y Axis)
-	var current_speed = BASE_SPEED
-	if is_sprinting:
-		current_speed *= SPRINT_MULTIPLIER
+    # Transition: If Jump pressed, switch to JUMP
+    if Input.is_action_just_pressed("move_jump") and try_deduct_stamina("jump"):
+        start_jump()
+        return
 
-	if direction != Vector2.ZERO:
-		velocity = direction * current_speed
-		update_facing_direction(direction)
-	else:
-		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
+    # Behavior: Friction stops the player
+    velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
+    handle_regen(delta)
 
-	move_and_slide()
-	
-	# 6. Regen Stamina
-	if not is_sprinting:
-		handle_regen(delta)
+func handle_move_state(dir: Vector2, delta: float) -> void:
+    # Transition: If no input, switch to IDLE
+    if dir == Vector2.ZERO:
+        current_state = State.IDLE
+        return
+        
+    # Transition: If Jump pressed, switch to JUMP
+    if Input.is_action_just_pressed("move_jump") and try_deduct_stamina("jump"):
+        start_jump()
+        return
 
-	# 7. Update UI
-	update_ui()
-	
-	# 8. Camera
-	handle_camera(delta)
+    # Behavior: Handle Sprinting
+    var current_speed = BASE_SPEED
+    
+    # 1. Check if the player WANTS to sprint
+    if Input.is_action_pressed("move_fast"):
+        # 2. Check if they CAN sprint
+        if stamina > 0:
+            current_speed *= SPRINT_MULTIPLIER
+            drain_stamina("sprint", delta)
+        else:
+            pass 
+    else:
+        handle_regen(delta)
 
-# --- Helper Functions ---
+    velocity = dir * current_speed
 
-func handle_z_axis(delta: float) -> void:
-	if z_height < 0 or z_velocity != 0:
-		z_velocity += GRAVITY_Z * delta
-		z_height += z_velocity * delta
-		
-		if z_height >= 0:
-			z_height = 0
-			z_velocity = 0
-			
-	# Check if sprite exists before moving it
-	if sprite:
-		sprite.position.y = z_height
+func handle_jump_state(dir: Vector2, delta: float) -> void:
+    var current_speed = BASE_SPEED
+    if Input.is_action_pressed("move_fast"):
+        current_speed *= SPRINT_MULTIPLIER
+    
+    if dir != Vector2.ZERO:
+        velocity = dir * current_speed
+    else:
+        velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
+    
+    # Gravity Logic
+    z_velocity += GRAVITY_Z * delta
+    z_height += z_velocity * delta
+    
+    # Landing Logic
+    if z_height >= 0:
+        z_height = 0
+        z_velocity = 0
+        current_state = State.IDLE # Return to ground state
 
-func drain_stamina(action_name: String, delta: float) -> void:
-	if action_name in STAMINA_COSTS:
-		stamina -= STAMINA_COSTS[action_name] * delta
-		stamina = max(stamina, 0)
+# --- Visuals & Helpers ---
 
-func try_deduct_stamina(action_name: String) -> bool:
-	if action_name in STAMINA_COSTS:
-		var cost = STAMINA_COSTS[action_name]
-		if stamina >= cost:
-			stamina -= cost
-			return true
-	return false
+func start_jump() -> void:
+    current_state = State.JUMP
+    z_velocity = -JUMP_FORCE
 
-func handle_regen(delta: float) -> void:
-	if stamina < max_stamina:
-		stamina += STAMINA_REGEN * delta
-		stamina = min(stamina, max_stamina)
+func update_visuals(dir: Vector2, delta: float) -> void:
+    if not sprite: return
+    
+    # 1. Facing Direction
+    if dir != Vector2.ZERO:
+        update_facing_direction(dir)
+    
+    # 2. Bobbing Calculation (Only when moving on ground)
+    var bob_offset = 0
+    if current_state == State.MOVE:
+        bob_time += delta * BOB_FREQUENCY
+        # Sin wave gives us -1 to 1. We multiply by Amplitude.
+        # abs() makes it a "bounce" (half circle) instead of up/down wave if desired
+        bob_offset = sin(bob_time) * BOB_AMPLITUDE
+    else:
+        # Reset bob time so next walk starts fresh
+        bob_time = 0.0
 
-func update_ui() -> void:
-	if stamina_bar:
-		stamina_bar.value = stamina
+    # 3. Combine Z-Height (Jump) and Bobbing (Walk)
+    # Note: z_height is usually negative (up), so we add them
+    sprite.position.y = z_height - abs(bob_offset) 
 
 func update_facing_direction(dir: Vector2) -> void:
-	if not sprite: return # Safety check
+    # Prioritize axis with stronger input (Isometric friendly)
+    if abs(dir.x) > abs(dir.y):
+        sprite.texture = TEX_RIGHT if dir.x > 0 else TEX_LEFT
+    else:
+        sprite.texture = TEX_DOWN if dir.y > 0 else TEX_UP
 
-	# Prioritize axis with stronger input
-	if abs(dir.x) > abs(dir.y):
-		if dir.x > 0:
-			sprite.texture = TEX_RIGHT
-		else:
-			sprite.texture = TEX_LEFT
-	else:
-		if dir.y > 0:
-			sprite.texture = TEX_DOWN
-		else:
-			sprite.texture = TEX_UP
+func drain_stamina(action: String, delta: float) -> void:
+    if action in STAMINA_COSTS:
+        stamina = max(stamina - STAMINA_COSTS[action] * delta, 0)
+
+func try_deduct_stamina(action: String) -> bool:
+    if action in STAMINA_COSTS and stamina >= STAMINA_COSTS[action]:
+        stamina -= STAMINA_COSTS[action]
+        return true
+    return false
+
+func handle_regen(delta: float) -> void:
+    stamina = min(stamina + STAMINA_REGEN * delta, max_stamina)
+
+func update_ui() -> void:
+    if stamina_bar: stamina_bar.value = stamina
 
 func handle_camera(delta: float) -> void:
-	if camera:
-		var cam_input = Input.get_vector("camera_left", "camera_right", "camera_up", "camera_down")
-		if cam_input:
-			camera.position += cam_input * CAM_SPEED * delta
+    if camera:
+        var cam_input = Input.get_vector("camera_left", "camera_right", "camera_up", "camera_down")
+        if cam_input: camera.position += cam_input * CAM_SPEED * delta

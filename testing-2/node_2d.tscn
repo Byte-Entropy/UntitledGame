@@ -1108,8 +1108,10 @@ stamina_bar = NodePath("StaminaBar")
 camera = NodePath("Camera2D")
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1569742667]
-position = Vector2(-1, -5)
+position = Vector2(0, 3)
 zoom = Vector2(2.61, 2.61)
+limit_smoothed = true
+position_smoothing_enabled = true
 
 [node name="StaminaBar" type="TextureProgressBar" parent="Player" unique_id=692756689]
 offset_left = -197.0
