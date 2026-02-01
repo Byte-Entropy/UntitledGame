@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dbxmrl71pxa58"
-path="res://.godot/imported/Untitled.png-30da513a925d9064453decddf41ecbd4.ctex"
+uid="uid://pg8x42vr3t6j"
+path="res://.godot/imported/big_isometric_tileset64x32.png-a541e406aaed71832b9c736a07414598.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Untitled.png"
-dest_files=["res://.godot/imported/Untitled.png-30da513a925d9064453decddf41ecbd4.ctex"]
+source_file="res://Art/big_isometric_tileset64x32.png"
+dest_files=["res://.godot/imported/big_isometric_tileset64x32.png-a541e406aaed71832b9c736a07414598.ctex"]
 
 [params]
 
