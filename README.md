@@ -30,7 +30,7 @@
 
 - [x] **Stamina System:** Drain on sprint/jump, regen on idle
 - [x] **UI Integration:** TextureProgressBar anchored to screen (HUD)
-- [ ] **Stamina Polish:** Add "Exhausted" state (cannot sprint until stamina > 20%)
+- [x] **Stamina Polish:** Add "Exhausted" state (cannot sprint until stamina > 20%)
 
 ---
 
@@ -40,7 +40,7 @@
 
 ### 2.1 Advanced Movement (The "Souls" Feel)
 
-- [ ] **Dodge Roll:** Add ROLL state with high velocity burst and ignoring input during animation
+- [x] **Dodge Roll:** Add ROLL state with high velocity burst and ignoring input during animation
 - [ ] **I-Frames:** Implement "Invincibility Frames" during the middle of the roll
 - [ ] **Hit Stop:** Tiny time freeze (0.1s) when damage is dealt for impact
 
@@ -64,7 +64,7 @@
 
 ### 3.1 Depth Sorting
 
-- [x] **Y-Sort:** Configure TileMapLayers and Actors for correct occlusion
+- [WIP] **Y-Sort:** Configure TileMapLayers and Actors for correct occlusion
 - [ ] **Transparency:** Detect when Player is behind a wall and turn the wall semi-transparent
 
 ### 3.2 "Fake" Elevation (Stairs/Cliffs)
