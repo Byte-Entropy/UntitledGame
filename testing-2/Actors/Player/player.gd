@@ -16,6 +16,13 @@ extends CharacterBody2D
 # * VARIABLES
 # ************************************
 
+# === State Variables ===
+var health: int = 100
+var is_invincible: bool = false
+
+# === Node References ===
+@onready var hurtbox: Hurtbox = get_parent().get_node_or_null("Hurtbox")
+
 # === Node References ===
 @export var stamina_bar: TextureProgressBar
 @export var camera: Camera2D
@@ -85,6 +92,11 @@ func _ready() -> void:
 	if not sprite: 
 		sprite = $Sprite2D
 		if not sprite: print("ERROR: Sprite2D missing!")
+	if not camera:
+		camera = $Camera2D
+		if not camera: print("ERROR: Camera2D missing!")
+	if hurtbox:
+		hurtbox.received_hit.connect(_on_received_hit)
 
 ## Converts a standard Cartesian vector (2D top-down) into Isometric projection.
 ##
@@ -120,11 +132,31 @@ func _physics_process(delta: float) -> void:
 	update_ui()
 	running_particle_effect()
 
+# ================
+# === ON EVENT ===
+# ================
+
+## Driver-level handler for when the hurtbox detects a hit.
+## Determines if damage should be applied based on current player state.
+##
+## @param damage: The amount of health to deduct.
+## @param knockback: The vector force to apply to the player's velocity.
+func _on_received_hit(damage: int, knockback: Vector2) -> void:
+	# Determine if interaction is valid
+	if is_invincible or current_state == State.ROLL:
+		print_debug("Player hit ignored due to invincibility or rolling.")
+		return  # Iframes
+	
+	# Apply damage and knockback
+	health -= damage
+	velocity = knockback
+
+	print_debug("Player hit! Health remaining: ", health)
+
+
 # ======================
 # === STATE HANDLERS ===
 # ======================
-
-
 
 
 ## Handles logic when the player is standing still.
@@ -253,6 +285,18 @@ func handle_block_state(dir: Vector2, delta: float) -> void:
 	dir = dir  
 	delta = delta  
 	pass
+
+
+
+# =================
+# === ON ACTION ===
+# =================
+
+func _on_player_hurt(damage: int, knockback: Vector2) -> void:
+	# Perform "on_contact" actions here
+	health -= damage
+	velocity = knockback
+	print("Ouch! Remaining health: ", health)
 
 # ========================
 # === HELPER FUNCTIONS ===
