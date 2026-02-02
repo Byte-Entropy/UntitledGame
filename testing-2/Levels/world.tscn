@@ -1181,4 +1181,15 @@ texture_under = SubResource("GradientTexture2D_epypp")
 texture_over = ExtResource("3_epypp")
 texture_progress = SubResource("GradientTexture2D_q6r6c")
 
+[node name="HealthBar" type="TextureProgressBar" parent="Player" unique_id=212390423]
+offset_left = -37.0
+offset_top = -29.0
+offset_right = 38.0
+offset_bottom = -24.0
+texture_under = SubResource("GradientTexture2D_epypp")
+texture_over = ExtResource("3_epypp")
+texture_progress = SubResource("GradientTexture2D_q6r6c")
+tint_under = Color(0.9987082, 0, 0.044635125, 1)
+tint_progress = Color(0.69411767, 0.46666667, 0.12156863, 1)
+
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=956174653]
