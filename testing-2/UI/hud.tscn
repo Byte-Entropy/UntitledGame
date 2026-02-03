@@ -1,0 +1,94 @@
+[gd_scene format=3 uid="uid://8u3b0smijo40"]
+
+[ext_resource type="Texture2D" uid="uid://dcpt1k7igg85t" path="res://UI/assets/bar_stam.png" id="2_2o5uh"]
+
+[sub_resource type="Gradient" id="Gradient_ne75i"]
+offsets = PackedFloat32Array(0.24093264, 0.48963732, 0.7072539)
+colors = PackedColorArray(0.6928372, 0.4670385, 0.12266443, 1, 1.1438694, 0.77744275, 0.22780283, 1, 0.6928372, 0.4670385, 0.12266443, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_b1lf8"]
+gradient = SubResource("Gradient_ne75i")
+width = 100
+height = 15
+fill_from = Vector2(0, 1)
+fill_to = Vector2(0, 0)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_bytes"]
+load_path = "res://.godot/imported/bar_helth.png-d63f22da4da1565d7426772b1b870b57.ctex"
+
+[sub_resource type="Gradient" id="Gradient_2o5uh"]
+offsets = PackedFloat32Array(0.2357513, 0.53108805, 0.7901554)
+colors = PackedColorArray(0.56078434, 0, 0.043137256, 1, 1.1638972, 0, 0.13993745, 1, 0.56078434, 0, 0.043137256, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_rnl6m"]
+gradient = SubResource("Gradient_2o5uh")
+width = 100
+height = 15
+fill_from = Vector2(0, 1)
+fill_to = Vector2(0, 0)
+
+[sub_resource type="Gradient" id="Gradient_0e48y"]
+offsets = PackedFloat32Array(0.24093264, 0.48963732, 0.7072539)
+colors = PackedColorArray(0.6928372, 0.4670385, 0.12266443, 1, 1.1438694, 0.77744275, 0.22780283, 1, 0.6928372, 0.4670385, 0.12266443, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1ui3w"]
+gradient = SubResource("Gradient_0e48y")
+width = 100
+height = 15
+fill_from = Vector2(0, 1)
+fill_to = Vector2(0, 0)
+
+[sub_resource type="Gradient" id="Gradient_0hol4"]
+offsets = PackedFloat32Array(0.24093264, 0.5414508, 0.7953368)
+colors = PackedColorArray(0.12332273, 0.49967188, 0.06081069, 1, 0.25921082, 0.92924803, 0.15451749, 1, 0.12332273, 0.49967188, 0.06081069, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_0j753"]
+gradient = SubResource("Gradient_0hol4")
+width = 100
+height = 15
+fill_from = Vector2(0, 1)
+fill_to = Vector2(0, 0)
+
+[node name="Node2D" type="Node2D" unique_id=1937645331]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=310883858]
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer" unique_id=1918752546]
+anchors_preset = -1
+offset_left = 120.0
+offset_top = 64.0
+offset_right = 635.0
+offset_bottom = 133.225
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer" unique_id=1152783550]
+texture_filter = 1
+layout_mode = 2
+theme_override_constants/separation = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="HealthBar" type="TextureProgressBar" parent="CanvasLayer/MarginContainer/VBoxContainer" unique_id=696295796]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+nine_patch_stretch = true
+stretch_margin_left = 15
+stretch_margin_top = 2
+stretch_margin_right = 15
+stretch_margin_bottom = 2
+texture_under = SubResource("GradientTexture2D_b1lf8")
+texture_over = SubResource("CompressedTexture2D_bytes")
+texture_progress = SubResource("GradientTexture2D_rnl6m")
+metadata/_edit_use_anchors_ = true
+
+[node name="StaminaBar" type="TextureProgressBar" parent="CanvasLayer/MarginContainer/VBoxContainer" unique_id=914051885]
+custom_minimum_size = Vector2(100, 25)
+layout_mode = 2
+nine_patch_stretch = true
+stretch_margin_left = 15
+stretch_margin_top = 2
+stretch_margin_right = 15
+stretch_margin_bottom = 2
+texture_under = SubResource("GradientTexture2D_1ui3w")
+texture_over = ExtResource("2_2o5uh")
+texture_progress = SubResource("GradientTexture2D_0j753")
+metadata/_edit_use_anchors_ = true

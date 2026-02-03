@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dww5756eoqr7a"
-path="res://.godot/imported/E.png-9a57704b10aa60ed36d8298f37b09d69.ctex"
+uid="uid://chi6f4pch5ox1"
+path="res://.godot/imported/slime_4.png-6634a2e25d59ace74c6c6215e5ef6c6e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Actors/Player/assets/E.png"
-dest_files=["res://.godot/imported/E.png-9a57704b10aa60ed36d8298f37b09d69.ctex"]
+source_file="res://Actors/Enemies/Slime/slime_4.png"
+dest_files=["res://.godot/imported/slime_4.png-6634a2e25d59ace74c6c6215e5ef6c6e.ctex"]
 
 [params]
 

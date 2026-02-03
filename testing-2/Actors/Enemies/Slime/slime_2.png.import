@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://y1pyqmv4gfxc"
-path="res://.godot/imported/stamina_bar.png-201b08d337e9dc88f8bef76e5e880390.ctex"
+uid="uid://b8g7yw72fnn7n"
+path="res://.godot/imported/slime_2.png-06b542933edcb731cbad9406153a8dcb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://UI/assets/stamina_bar.png"
-dest_files=["res://.godot/imported/stamina_bar.png-201b08d337e9dc88f8bef76e5e880390.ctex"]
+source_file="res://Actors/Enemies/Slime/slime_2.png"
+dest_files=["res://.godot/imported/slime_2.png-06b542933edcb731cbad9406153a8dcb.ctex"]
 
 [params]
 

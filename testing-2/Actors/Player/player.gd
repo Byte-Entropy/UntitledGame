@@ -16,17 +16,12 @@ extends CharacterBody2D
 # * VARIABLES
 # ************************************
 
-# === State Variables ===
-var health: int = 100
-var is_invincible: bool = false
-
-# === Node References ===
-@onready var hurtbox: Hurtbox = get_parent().get_node_or_null("Hurtbox")
-
 # === Node References ===
 @export var stamina_bar: TextureProgressBar
+@export var health_bar: TextureProgressBar
 @export var camera: Camera2D
 @export var sprite: Sprite2D 
+@onready var hurtbox: Hurtbox = get_parent().get_node_or_null("Hurtbox")
 
 # === Configuration: Movement ===
 const BASE_SPEED = 100.0
@@ -37,6 +32,10 @@ const CAM_SPEED = 500.0
 # === Configuration: Animation (Bobbing) ===
 const BOB_FREQUENCY = 10.0  
 const BOB_AMPLITUDE = 4.3   
+
+# === Configuration: Health ===
+const MAX_HEALTH = 100
+#const INVINCIBILITY_DURATION = 1.0
 
 # === Configuration: Stamina & Resources ===
 const STAMINA_COSTS = {
@@ -64,6 +63,9 @@ var is_exhausted: bool = false
 var roll_timer: float = 0.0
 var recovery_timer: float = 0.0
 var roll_queued: bool = false 
+var health: float = 100.0
+var max_health: float = 100.0
+
 
 ## The locked direction vector for the current roll.
 var current_roll_dir: Vector2 = Vector2.ZERO
@@ -77,11 +79,10 @@ var z_velocity: float = 0.0
 var bob_time: float = 0.0 
 
 # === Preloaded Sprites ===
-const TEX_UP = preload("res://Actors/Player/assets/N.png")
-const TEX_DOWN = preload("res://Actors/Player/assets/S.png")
-const TEX_LEFT = preload("res://Actors/Player/assets/W.png")
-const TEX_RIGHT = preload("res://Actors/Player/assets/E.png")
-
+const TEX_UP = preload("res://Actors/Player/assets/playersprites/N.png")
+const TEX_DOWN = preload("res://Actors/Player/assets/playersprites/S.png")
+const TEX_LEFT = preload("res://Actors/Player/assets/playersprites/W.png")
+const TEX_RIGHT = preload("res://Actors/Player/assets/playersprites/E.png")
 
 # ************************************
 # * FUNCTION DEFINITIONS
@@ -89,14 +90,22 @@ const TEX_RIGHT = preload("res://Actors/Player/assets/E.png")
 
 func _ready() -> void:
 	if not stamina_bar: print("ERROR: Stamina Bar missing!")
+	if not health_bar: print("ERROR: Health Bar missing!")
 	if not sprite: 
 		sprite = $Sprite2D
 		if not sprite: print("ERROR: Sprite2D missing!")
 	if not camera:
 		camera = $Camera2D
 		if not camera: print("ERROR: Camera2D missing!")
+
 	if hurtbox:
 		hurtbox.received_hit.connect(_on_received_hit)
+	if health_bar:
+		health_bar.max_value = max_health
+		health_bar.value = health
+	if stamina_bar:
+		stamina_bar.max_value = max_stamina
+		stamina_bar.value = stamina
 
 ## Converts a standard Cartesian vector (2D top-down) into Isometric projection.
 ##
@@ -142,13 +151,14 @@ func _physics_process(delta: float) -> void:
 ## @param damage: The amount of health to deduct.
 ## @param knockback: The vector force to apply to the player's velocity.
 func _on_received_hit(damage: int, knockback: Vector2) -> void:
+	
 	# Determine if interaction is valid
-	if is_invincible or current_state == State.ROLL:
-		print_debug("Player hit ignored due to invincibility or rolling.")
-		return  # Iframes
+#	if is_invincible or current_state == State.ROLL:
+#		print_debug("Player hit ignored due to invincibility or rolling.")
+#		return  # Iframes
 	
 	# Apply damage and knockback
-	health -= damage
+	health = max(health - damage, 0)
 	velocity = knockback
 
 	print_debug("Player hit! Health remaining: ", health)
@@ -292,11 +302,6 @@ func handle_block_state(dir: Vector2, delta: float) -> void:
 # === ON ACTION ===
 # =================
 
-func _on_player_hurt(damage: int, knockback: Vector2) -> void:
-	# Perform "on_contact" actions here
-	health -= damage
-	velocity = knockback
-	print("Ouch! Remaining health: ", health)
 
 # ========================
 # === HELPER FUNCTIONS ===
@@ -353,9 +358,12 @@ func try_deduct_stamina(action: String) -> bool:
 func handle_regen(delta: float) -> void:
 	stamina = min(stamina + STAMINA_REGEN * delta, max_stamina)
 
-## Updates the UI bar to match current stamina values.
+## Updates the UI bar to match current stamina and health values.
 func update_ui() -> void:
-	if stamina_bar: stamina_bar.value = stamina
+	if stamina_bar: 
+		stamina_bar.value = stamina
+	if health_bar:
+		health_bar.value = health
 
 
 ## Checks if a roll was queued during the previous action.

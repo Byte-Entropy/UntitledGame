@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bccvoenpucy7i"
-path="res://.godot/imported/S.png-1024baecf1ed8c1191a7b0e54e60f18e.ctex"
+uid="uid://btm5nkngo2m4n"
+path="res://.godot/imported/alt_bar_helth.png-f185a3b2c0ddaa9f4ad3b6eb0a82ddfd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Actors/Player/assets/S.png"
-dest_files=["res://.godot/imported/S.png-1024baecf1ed8c1191a7b0e54e60f18e.ctex"]
+source_file="res://UI/assets/alt_bar_helth.png"
+dest_files=["res://.godot/imported/alt_bar_helth.png-f185a3b2c0ddaa9f4ad3b6eb0a82ddfd.ctex"]
 
 [params]
 
