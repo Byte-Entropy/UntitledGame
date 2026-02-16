@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://c5dfxrwwuuysv"]
 
 [ext_resource type="Script" uid="uid://cgsc0otreruxe" path="res://Levels/world.gd" id="1_4dvsh"]
-[ext_resource type="Texture2D" uid="uid://pg8x42vr3t6j" path="res://Art/big_isometric_tileset64x32.png" id="1_wtcfe"]
+[ext_resource type="Texture2D" uid="uid://pg8x42vr3t6j" path="res://Art/prairies_tileset.png" id="1_wtcfe"]
 [ext_resource type="PackedScene" uid="uid://dpyfrwq0tmg2t" path="res://Actors/Player/player.tscn" id="2_0e48y"]
 [ext_resource type="PackedScene" uid="uid://8u3b0smijo40" path="res://UI/hud.tscn" id="4_4dvsh"]
 
@@ -1161,6 +1161,8 @@ position = Vector2(164, -203)
 
 [node name="MarginContainer" parent="HUD/CanvasLayer" parent_id_path=PackedInt32Array(1937645331, 310883858) index="0" unique_id=1918752546]
 anchor_left = 0.027777778
+anchor_top = -0.004976861
+anchor_right = 0.027777778
 anchor_bottom = -0.004976861
 offset_left = 37.0
 offset_top = 37.0

@@ -22,6 +22,8 @@ extends CharacterBody2D
 @export var camera: Camera2D
 @export var sprite: Sprite2D 
 @onready var hurtbox: Hurtbox = get_parent().get_node_or_null("Hurtbox")
+@onready var hand_pivot: Node2D = $HandPivot
+@onready var anim_player: AnimationPlayer = $AnimationPlayer
 
 # === Configuration: Movement ===
 const BASE_SPEED = 100.0
@@ -41,7 +43,8 @@ const MAX_HEALTH = 100
 const STAMINA_COSTS = {
 	"sprint": 20.0,
 	"jump": 15.0,
-	"roll": 15.0
+	"roll": 15.0,
+	"attack": 10.0
 }
 const STAMINA_REGEN = 10.0
 
@@ -122,6 +125,9 @@ func _physics_process(delta: float) -> void:
 	# 2. Movement Input
 	var input_dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var iso_dir = to_isometric(input_dir)
+
+	if iso_dir != Vector2.ZERO:
+		iso_dir = iso_dir.normalized() # Normalize for consistent speed in all directions
 	
 	# 3. State Machine Logic
 	match current_state:
@@ -129,9 +135,12 @@ func _physics_process(delta: float) -> void:
 		State.MOVE:     handle_move_state(iso_dir, delta)
 		State.JUMP:     handle_jump_state(iso_dir, delta)
 		State.ROLL:     handle_roll_state(iso_dir, delta)
-		State.ATTACK:   handle_attack_state(iso_dir, delta)
+		State.ATTACK:   handle_attack_state()
 		State.BLOCK:    handle_block_state(iso_dir, delta)
 		State.RECOVERY: pass 
+		
+	if Input.is_action_just_pressed("attack") and try_deduct_stamina("attack"):
+			handle_attack_state()
 
 	# 4. Apply Physics (Slide)
 	move_and_slide()
@@ -284,11 +293,38 @@ func handle_roll_state(dir: Vector2, delta: float) -> void:
 		velocity = current_roll_dir * ROLL_SPEED
 
 
-## Placeholder for Attack state logic.
-func handle_attack_state(dir: Vector2, delta: float) -> void:
-	dir = dir  
-	delta = delta  
-	pass
+
+## Enters the attack state, which plays an animation and locks movement.
+## The attack direction is determined by current input or last movement.
+##
+## @return void
+## param dir: The input direction at the moment of attack initiation (used for aiming).
+func handle_attack_state() -> void:
+	current_state = State.ATTACK
+	velocity = Vector2.ZERO # Stop moving
+	
+	# 1. Aim the pivot
+	# If we are moving, attack in movement direction. 
+	# If standing still, attack in the last moved direction (or mouse).
+	var last_move_dir = velocity.normalized()
+	var attack_dir = last_move_dir
+	if attack_dir == Vector2.ZERO:
+		attack_dir = Vector2.DOWN # Default fallback
+	
+	# MathIO: Calculate angle
+	# angle = atan2(y, x)
+	hand_pivot.rotation = attack_dir.angle()
+	
+	# 2. Play Animation
+	anim_player.play("attack_swing")
+	
+	# 3. Wait for animation to finish
+	await anim_player.animation_finished
+	
+	# 4. Reset
+	current_state = State.IDLE
+	
+
 
 ## Placeholder for Block state logic.
 func handle_block_state(dir: Vector2, delta: float) -> void:
