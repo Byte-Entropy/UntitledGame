@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://pg8x42vr3t6j"
-path="res://.godot/imported/prairies_tileset.png-b85f6c9b550ac41b6f73e4c2222f898c.ctex"
+uid="uid://b0rc1g0wyylea"
+path="res://.godot/imported/OSS_objects.png-b5f12f3467c1b528f233015dde67b47f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Art/prairies_tileset.png"
-dest_files=["res://.godot/imported/prairies_tileset.png-b85f6c9b550ac41b6f73e4c2222f898c.ctex"]
+source_file="res://Art/OSS_objects.png"
+dest_files=["res://.godot/imported/OSS_objects.png-b5f12f3467c1b528f233015dde67b47f.ctex"]
 
 [params]
 

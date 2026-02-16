@@ -24,14 +24,30 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("HandPivot/WeaponPivot:rotation")
+tracks/0/path = NodePath("HandPivot/WeaponPivot/SwordSprite:visible")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="Animation" id="Animation_b63gh"]
+resource_name = "attack_swing"
+length = 0.33333334
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("HandPivot/WeaponPivot:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(3.1383357, 1),
 "update": 0,
-"values": [0.0]
+"values": [1.7453292519943295, -1.7453292519943295]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -45,10 +61,22 @@ tracks/1/keys = {
 "update": 1,
 "values": [true]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("HandPivot/WeaponPivot/SwordSprite:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.3),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
 
-[sub_resource type="Animation" id="Animation_b63gh"]
-resource_name = "attack_swing"
-length = 0.3
+[sub_resource type="Animation" id="Animation_n7l8t"]
+resource_name = "reverse_attack_swing"
+length = 0.33333334
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -56,22 +84,22 @@ tracks/0/path = NodePath("HandPivot/WeaponPivot:rotation")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(3.1383357, 1),
 "update": 0,
-"values": [-1.7453292519943295]
+"values": [-1.7453292519943295, 1.7453292519943295]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("HandPivot/WeaponPivot:rotation")
+tracks/1/path = NodePath("HandPivot/WeaponPivot/SwordSprite:visible")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0.3),
+"times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [1.7453292519943295]
+"update": 1,
+"values": [true]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -80,18 +108,6 @@ tracks/2/path = NodePath("HandPivot/WeaponPivot/SwordSprite:visible")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [true]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("HandPivot/WeaponPivot/SwordSprite:visible")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
 "times": PackedFloat32Array(0.3),
 "transitions": PackedFloat32Array(1),
 "update": 1,
@@ -101,8 +117,14 @@ tracks/3/keys = {
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_n7l8t"]
 _data = {
 &"RESET": SubResource("Animation_v1key"),
-&"attack_swing": SubResource("Animation_b63gh")
+&"attack_swing": SubResource("Animation_b63gh"),
+&"reverse_attack_swing": SubResource("Animation_n7l8t")
 }
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_v1key"]
+resource_local_to_scene = true
+cull_mode = 1
+polygon = PackedVector2Array(1, 11, 10, 10, 1, 9, -8, 10)
 
 [node name="Player" type="CharacterBody2D" unique_id=144835515 node_paths=PackedStringArray("sprite")]
 z_index = 1
@@ -111,6 +133,7 @@ script = ExtResource("1_onrkg")
 sprite = NodePath("PlayerArt")
 
 [node name="ShadowSprite" type="Sprite2D" parent="." unique_id=1097757581]
+visible = false
 position = Vector2(1, 11)
 texture = SubResource("GradientTexture2D_i3pqv")
 
@@ -123,7 +146,6 @@ scale = Vector2(0.36328125, 0.3339844)
 texture = ExtResource("2_5ni5v")
 
 [node name="RunningParticles2D" type="CPUParticles2D" parent="." unique_id=1951619535]
-visible = false
 position = Vector2(0, 9)
 amount = 10
 lifetime = 0.15000000000000002
@@ -136,19 +158,24 @@ scale_amount_max = 5.0
 color = Color(0.25490198, 0.12941177, 0.019607844, 1)
 hue_variation_max = 0.3
 
-[node name="SwordCopy" type="Sprite2D" parent="." unique_id=75065877]
-position = Vector2(-1, -1)
-scale = Vector2(0.328125, 0.484375)
-texture = ExtResource("3_v1key")
-
 [node name="HandPivot" type="Node2D" parent="." unique_id=1444005067]
 y_sort_enabled = true
 
 [node name="WeaponPivot" type="Node2D" parent="HandPivot" unique_id=1921345780]
+rotation = -1.7453293
 
 [node name="SwordSprite" type="Node2D" parent="HandPivot/WeaponPivot" unique_id=2054813730]
-z_index = 5
+z_index = 1
+
+[node name="SwordCopy" type="Sprite2D" parent="HandPivot/WeaponPivot/SwordSprite" unique_id=75065877]
+position = Vector2(-1, -1)
+scale = Vector2(0.328125, 0.484375)
+texture = ExtResource("3_v1key")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1466744218]
 libraries/ = SubResource("AnimationLibrary_n7l8t")
 autoplay = &"attack_swing"
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=1127781095]
+occluder = SubResource("OccluderPolygon2D_v1key")
+sdf_collision = false

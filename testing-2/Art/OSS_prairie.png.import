@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bbmxmfrix7t5y"
-path="res://.godot/imported/slime_3.png-da2a41a5c20fe55c8b01b36b3c8ef9de.ctex"
+uid="uid://pg8x42vr3t6j"
+path="res://.godot/imported/OSS_prairie.png-464cdecd2cc6094df4d75689fb1cfc3f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Actors/Enemies/Slime/slime_3.png"
-dest_files=["res://.godot/imported/slime_3.png-da2a41a5c20fe55c8b01b36b3c8ef9de.ctex"]
+source_file="res://Art/OSS_prairie.png"
+dest_files=["res://.godot/imported/OSS_prairie.png-464cdecd2cc6094df4d75689fb1cfc3f.ctex"]
 
 [params]
 

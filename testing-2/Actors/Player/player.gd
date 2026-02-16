@@ -81,6 +81,8 @@ var z_height: float = 0.0
 var z_velocity: float = 0.0
 var bob_time: float = 0.0 
 
+var last_move_direction: Vector2 = Vector2.DOWN # Default facing down
+
 # === Preloaded Sprites ===
 const TEX_UP = preload("res://Actors/Player/assets/playersprites/N.png")
 const TEX_DOWN = preload("res://Actors/Player/assets/playersprites/S.png")
@@ -128,6 +130,7 @@ func _physics_process(delta: float) -> void:
 
 	if iso_dir != Vector2.ZERO:
 		iso_dir = iso_dir.normalized() # Normalize for consistent speed in all directions
+		last_move_direction = iso_dir
 	
 	# 3. State Machine Logic
 	match current_state:
@@ -135,12 +138,13 @@ func _physics_process(delta: float) -> void:
 		State.MOVE:     handle_move_state(iso_dir, delta)
 		State.JUMP:     handle_jump_state(iso_dir, delta)
 		State.ROLL:     handle_roll_state(iso_dir, delta)
-		State.ATTACK:   handle_attack_state()
 		State.BLOCK:    handle_block_state(iso_dir, delta)
 		State.RECOVERY: pass 
 		
+	# Transition: Attack
 	if Input.is_action_just_pressed("attack") and try_deduct_stamina("attack"):
-			handle_attack_state()
+		handle_attack_state(last_move_direction)
+
 
 	# 4. Apply Physics (Slide)
 	move_and_slide()
@@ -177,6 +181,10 @@ func _on_received_hit(damage: int, knockback: Vector2) -> void:
 # === STATE HANDLERS ===
 # ======================
 
+func check_direction_valid(dir) -> bool:
+	if dir != Vector2.ZERO or last_move_direction != Vector2.ZERO:
+		return true
+	return false
 
 ## Handles logic when the player is standing still.
 ## Transitions to MOVE, JUMP, or ROLL based on input.
@@ -184,6 +192,7 @@ func _on_received_hit(damage: int, knockback: Vector2) -> void:
 ## @param dir: The current input direction (used to trigger movement).
 ## @param delta: Time step for applying friction and regen.
 func handle_idle_state(dir: Vector2, delta: float) -> void:
+
 	# Transition: If input, switch to MOVE
 	if dir != Vector2.ZERO:
 		current_state = State.MOVE
@@ -276,7 +285,7 @@ func handle_jump_state(dir: Vector2, delta: float) -> void:
 ## @param delta: Time step.
 func handle_roll_state(dir: Vector2, delta: float) -> void:
 	roll_timer -= delta
-	
+
 	# 1. Input Queueing (The Memory)
 	if Input.is_action_just_pressed("move_roll"):
 		roll_queued = true 
@@ -299,7 +308,7 @@ func handle_roll_state(dir: Vector2, delta: float) -> void:
 ##
 ## @return void
 ## param dir: The input direction at the moment of attack initiation (used for aiming).
-func handle_attack_state() -> void:
+func handle_attack_state(dir: Vector2) -> void:
 	current_state = State.ATTACK
 	velocity = Vector2.ZERO # Stop moving
 	
@@ -309,19 +318,50 @@ func handle_attack_state() -> void:
 	var last_move_dir = velocity.normalized()
 	var attack_dir = last_move_dir
 	if attack_dir == Vector2.ZERO:
-		attack_dir = Vector2.DOWN # Default fallback
+		attack_dir = dir # Use input direction if no movement is happening
 	
-	# MathIO: Calculate angle
+	
 	# angle = atan2(y, x)
 	hand_pivot.rotation = attack_dir.angle()
-	
-	# 2. Play Animation
+
+		
+	# Get references (Adjust paths if yours are different)
+	var weapon_pivot = hand_pivot.get_node("WeaponPivot")
+	var sword_sprite = weapon_pivot.get_node("SwordSprite")
+
+	# Move the pivot along the local X-axis (Forward)
+	weapon_pivot.position.x = 10
+		
+	# 3. Swing Logic: "Right or Up" gets Normal Swing (100 to -100)
+	# If facing R or U, flip the Y-Scale to invert the swing arc.
+	#if attack_dir.x < 0 or attack_dir.y > 0:
+	#	weapon_pivot.scale.y = 1   # Normal
+	#else:
+	#	weapon_pivot.scale.x = -1  # Inverted (Mirrored Swing)
+	if attack_dir.x > 0:
+		weapon_pivot.scale.x = -1 # Mirror horizontally for clockwise swing
+		weapon_pivot.scale.y = 1
+	else:
+		weapon_pivot.scale.x = 1
+		weapon_pivot.scale.y = 1
+	# 4. Layer Logic: "Up" hides behind the player
+	if attack_dir.y < 0:
+		sword_sprite.z_index = -1 # Behind
+	else:
+		sword_sprite.z_index = 1  # Front
+
+	# --- NEW LOGIC ENDS HERE ---
+
+	# 5. Play Animation
 	anim_player.play("attack_swing")
-	
-	# 3. Wait for animation to finish
+		
 	await anim_player.animation_finished
-	
-	# 4. Reset
+		
+	# Optional: Reset scale/z-index to default to avoid editor confusion later
+	weapon_pivot.scale.x = 1
+	weapon_pivot.scale.y = 1
+	sword_sprite.z_index = 1
+		
 	current_state = State.IDLE
 	
 
@@ -352,24 +392,25 @@ func start_jump() -> void:
 ##
 ## @param dir: The intended direction of the roll.
 func start_roll(dir: Vector2) -> void:
-	# Sanity Check: Prevent rolling while standing completely still
-	if dir == Vector2.ZERO and velocity == Vector2.ZERO:
-		return 
+	# 1. Determine the direction locally
+	var target_dir = dir
+		
+	# If no input, use memory.
+	if target_dir == Vector2.ZERO:
+		target_dir = last_move_direction
+		
+	# Update memory if we have new input
+	if dir != Vector2.ZERO:
+		last_move_direction = dir.normalized()
 
-	# Set State
+	# 2. ASSIGN TO CLASS VARIABLE (The Fix)
+	current_roll_dir = target_dir.normalized()
+		
+	# 3. Set State
 	current_state = State.ROLL
 	roll_timer = ROLL_DURATION
-	
-	# Determine Direction
-	# If player is holding a key (changing direction), use that.
-	if dir != Vector2.ZERO:
-		current_roll_dir = dir.normalized()
-	# Otherwise, maintain momentum (allows straight chaining)
-	else:
-		current_roll_dir = velocity.normalized()
-		
-	velocity = current_roll_dir * ROLL_SPEED
-	spawn_ghost() # Pop the first ghost instantly
+	spawn_ghost()
+
 
 
 ## Drains stamina over time for continuous actions (like sprinting).
@@ -503,7 +544,7 @@ func spawn_ghost() -> void:
 ## Checks movement conditions and emits particles if sprinting on the ground.
 func running_particle_effect() -> void:
 	# Check State and Speed
-	if current_state == State.MOVE and velocity.length() > (BASE_SPEED*1.34):
+	if current_state == State.MOVE and velocity.length() > (BASE_SPEED):
 
 		# Detect ground contact
 		if z_height == 0:

@@ -19,31 +19,50 @@ extends Area2D
 # ************************************
 # * VARIABLES
 # ************************************
-
-# === Signals ===
-## Emitted when a valid hitbox is detected.
-## @param damage: The amount of damage passed by the hitbox.
-## @param knockback: The direction and force of the impact.
-signal received_hit(damage: int, knockback: Vector2)
+# === Z-Axis Simulation ===
+var z_height: float = 0.0
+var z_velocity: float = 0.0
+const GRAVITY = 980.0
+const JUMP_FORCE = 200.0
 
 # ************************************
 # * FUNCTION DEFINITIONS
 # ************************************
 
-func _ready() -> void:
-	# Connect internal signal to handle detections
-	area_entered.connect(_on_area_entered)
 
 
-## Internal listener for Area2D collisions. 
-## Validates the entering area and forwards data to the driver.
-##
-## @param area: The Area2D that entered the hurtbox.
-## @return void
-func _on_area_entered(area: Area2D) -> void:
-	# Driver-led check: Ensure the area can provide combat data
-	if area.has_method("get_damage"):
-		var damage = area.get_damage()
-		var knockback = area.get_knockback_vector()
-		
-		received_hit.emit(damage, knockback)
+# === State ===
+enum State { IDLE, CHASE, HURT }
+var current_state = State.IDLE
+var chase_target: Node2D = null
+
+func _physics_process(delta: float) -> void:
+    # 1. Apply Gravity (The Bounce)
+    z_velocity += GRAVITY * delta
+    z_height += z_velocity * delta
+    
+    # 2. Floor Collision (Bounce Logic)
+    if z_height >= 0:
+        z_height = 0
+        
+        # If chasing, jump again immediately!
+        if current_state == State.CHASE and chase_target:
+            z_velocity = -JUMP_FORCE
+            # Calculate direction towards player ONLY when launching
+            var direction = global_position.direction_to(chase_target.global_position)
+            velocity = direction * 50.0 # Move speed
+        else:
+            z_velocity = 0
+            velocity = Vector2.ZERO # Stop moving when on ground
+            
+    # 3. Visuals
+    $Visuals.position.y = z_height # Visuals go up/down
+    move_and_slide()
+
+# === Signal Connection from Hurtbox ===
+func _on_hurtbox_received_hit(damage: int, knockback: Vector2) -> void:
+    health -= damage
+    velocity = knockback * 300.0 # Apply instant Knockback
+    z_velocity = -150.0 # Pop it into the air a bit (Juice!)
+    current_state = State.HURT
+    # Add a timer or logic to return to CHASE
