@@ -1,131 +1,91 @@
-
 # Isometric Souls-like (2D) — Project Roadmap
 
-**Engine:** Godot 4.x  
-**Language:** GDScript  
-**Art Style:** Pixel Art / Isometric (2:1 projection)  
-**Core Mechanics:** Stamina management, precise combat, Z-axis simulation
+## Project Summary
+
+A 2D action RPG built in `Godot 4.x` focused on high-stakes combat, stamina management, and "fake" 3D depth. The game uses a 2:1 isometric projection to create a sense of verticality and exploration typical of the "Souls" genre.
+
+- **Engine:** `Godot 4.x`
+- **Language:** `GDScript`
+- **Art Style:** Pixel Art / Isometric
 
 ---
 
-## Phase 1 — Core Foundation *(Current Status)*
+## Current Status
 
-**Goal:** A character that feels good to control, interacts with the "fake" 3D world correctly, and manages resources.
+> We are currently in the transition between Phase 1 (Core Foundation) and Phase 2 (Combat).
 
-### 1.1 Physics & Projection
-
-- [x] **Input Map:** Configure WASD (Movement) + Shift (Sprint) + Space (Action/Jump)
-- [x] **Isometric Math:** Convert Cartesian inputs (WASD) into Isometric vectors (Cartesian to Iso)
-- [x] **Collision:** Setup CharacterBody2D collision box (feet only) for accurate depth
-- [x] **Camera:** Implement Camera2D with position smoothing (child of Player or RemoteTransform)
-
-### 1.2 Movement & State Machine
-
-- [x] **State Machine V1:** Implement Enum-based states (IDLE, MOVE, JUMP)
-- [x] **Visuals:** Implement "Bobbing" sine-wave animation for walking
-- [x] **Directional Sprites:** 4-Directional sprite swapping based on velocity
-- [x] **Z-Axis Simulation:** Visual jumping (sprite.y offset) independent of physics collision
-
-### 1.3 Resource Management
-
-- [x] **Stamina System:** Drain on sprint/jump, regen on idle
-- [x] **UI Integration:** TextureProgressBar anchored to screen (HUD)
-- [x] **Stamina Polish:** Add "Exhausted" state (cannot sprint until stamina > 20%)
+- **Active Sprint:** Implementing I-Frames for dodging and finishing the Y-Sort depth system.
+- **Recent Milestone:** Standardized Hitbox/Hurtbox system completed.
 
 ---
 
-## Phase 2 — Combat Architecture
+## 1. Core Logic & Mechanics
 
-**Goal:** Implement the "Crunch" — hitting things and getting hit.
+This section covers the "under the hood" systems and player interactions.
 
-### 2.1 Advanced Movement (The "Souls" Feel)
+### Movement & Physics
 
-- [x] **Dodge Roll:** Add ROLL state with high velocity burst and ignoring input during animation
-- [ ] **I-Frames:** Implement "Invincibility Frames" during the middle of the roll
-- [ ] **Hit Stop:** Tiny time freeze (0.1s) when damage is dealt for impact
+- Custom Cartesian-to-Isometric vector conversion.
+- State Machine: `IDLE`, `MOVE`, `JUMP`, `ROLL`, and `ATTACK`.
+- Z-Axis Simulation: Visual jumping independent of ground collision.
 
-### 2.2 Hitbox/Hurtbox System
+### Combat Systems
 
-- [ ] **Hurtbox Class:** Create a standardized Area2D class that receives damage (used by Player and Enemies)
-- [ ] **Hitbox Class:** Create a standardized Area2D class that deals damage
-- [ ] **Signal Bus:** Connect on_area_entered to subtract HP
+- Impact & Stagger: Heavy hits interrupt enemy actions or player movement.
+- Stamina Management: Resource drain for sprinting, jumping, and rolling.
+- Armor Weight: Equipment affects movement speed and dodge efficiency.
 
-### 2.3 Player Combat
+### Interaction & Persistence
 
-- [ ] **Attack State:** Add ATTACK state that stops movement
-- [ ] **Combo System:** Allow chaining 2-3 attacks if clicked with correct timing
-- [ ] **Visuals:** Add weapon swipe sprites or separate weapon pivot rotation
-
----
-
-## Phase 3 — World & Elevation *(The "Isometric Illusion")*
-
-**Goal:** Solving the hardest part of 2D isometric games—height and depth.
-
-### 3.1 Depth Sorting
-
-- [WIP] **Y-Sort:** Configure TileMapLayers and Actors for correct occlusion
-- [ ] **Transparency:** Detect when Player is behind a wall and turn the wall semi-transparent
-
-### 3.2 "Fake" Elevation (Stairs/Cliffs)
-
-- [ ] **Elevation Logic:** Create a variable `current_layer` (0, 1, 2)
-- [ ] **Collision Masks:** Change collision masks dynamically (e.g., on Layer 1, ignore Layer 0 walls)
-- [ ] **Stairs Triggers:** Area2D zones that transition z_height and current_layer smoothly
-
-### 3.3 Level Design
-
-- [ ] **TileSet Setup:** Define collision polygons for walls, pits, and water
-- [ ] **Navigation:** Bake NavigationRegion2D for enemy pathfinding
+- Swords in Stones: Acts as the primary saving mechanic and world checkpoint.
+- Environmental Interaction: Terrain effects like water slowing movement or grass hiding entities.
 
 ---
 
-## Phase 4 — Enemies & AI
+## 2. World Design & Art
 
-**Goal:** Creating resistance.
+Focuses on the "Isometric Illusion" and the progression of the game world.
 
-### 4.1 Basic Enemy (The "Slime")
+### Perspective Puzzles
 
-- [ ] **Stats:** HP, Damage, Speed
-- [ ] **Detection:** Area2D ("Aggro Range") to detect Player
-- [ ] **Behavior:** Simple "Move Toward" logic
+- Utilizing the 2:1 projection for verticality puzzles, hidden shortcuts, and ladders.
+- Lever-based mechanics to alter the environment.
 
-### 4.2 Advanced AI (The "Knight")
+### Depth Management
 
-- [ ] **State Machine:** Idle → Patrol → Chase → Attack → Stunned
-- [ ] **Pathfinding:** Use NavigationAgent2D to avoid walls while chasing
-- [ ] **Telegraphing:** Visual flash before attacking to give Player time to dodge
+- Dynamic Y-Sorting for actors and tile layers.
+- Transparency triggers for occluded players behind walls.
 
----
+### The World (Zones)
 
-## Phase 5 — Systems & Polish
-
-**Goal:** Turning a prototype into a game loop.
-
-### 5.1 Interactive Objects
-
-- [ ] **Interactable Class:** Press 'E' to talk/open
-- [ ] **Chests:** Animation + Loot drop
-- [ ] **Bonfires:** Save point that respawns enemies and refills potions
-
-### 5.2 NPC & Dialogue
-
-- [ ] **Dialogue System:** Simple JSON or Resource-based text parser
-- [ ] **UI:** Typing effect for text display
-
-### 5.3 Menus & Persistence
-
-- [ ] **Main Menu:** Start, Settings (Audio/Controls), Quit
-- [ ] **Pause Menu:** Freeze Engine.time_scale
-- [ ] **Save System:** Save Player Position, Stats, and Inventory to `user://savegame.json`
+- **The Prairies:** A chill starting area with NPCs, shops, and minor slime threats.
+- **The Forest:** Increased difficulty featuring bears and skeletons.
+- **The Sunken Cathedral:** A magic-heavy zone filled with Deacons.
+- **The Overgrown Fortress:** A semi-abandoned military site (Outskirts → Outer → Inner).
+- **The Obsidian Peak:** The final imposing climb through snow and darkness.
 
 ---
 
-## Phase 6 — Juice *(Visual Feedback)*
+## 3. Enemies & AI
 
-**Goal:** Make it feel professional.
+The game features a variety of threats ranging from simple blobs to complex sentinels.
 
-- [ ] **Particles:** Dust clouds when running/rolling
-- [ ] **Screen Shake:** On taking damage or heavy attacks
-- [ ] **Lighting:** PointLight2D for torches and atmosphere
-- [ ] **Audio:** Footsteps (synced to bobbing), Swing SFX, Impact SFX
+### Enemy Roster
+
+- **Slimes:** Basic "Move Toward" AI found in the Prairies and Forest.
+- **Skeletons & Bears:** Aggressive melee threats with telegraphing.
+- **Deacons:** Magic-based ranged enemies.
+- **Sentinels:** Advanced AI found guarding the Overgrown Fortress.
+
+### AI Logic
+
+- `NavigationAgent2D` for pathfinding around isometric obstacles.
+- State-based behavior: `Idle` → `Patrol` → `Aggro` → `Attack`.
+
+---
+
+## 4. Roadmap & Future Tasks
+
+- [ ] Visual Juice: Screen shake on heavy impact and dust particles for movement.
+- [ ] Elevation Logic: Dynamic collision mask swapping for multi-layer stairs.
+- [ ] Persistence: Save system for player stats and world state to `user://savegame.json`.
