@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://btm5nkngo2m4n"
-path="res://.godot/imported/alt_bar_helth.png-f185a3b2c0ddaa9f4ad3b6eb0a82ddfd.ctex"
+uid="uid://do1ehulik7x0e"
+path="res://.godot/imported/PSSCARD.png-08c2108202b315d55233002e67b2a85a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://UI/assets/alt_bar_helth.png"
-dest_files=["res://.godot/imported/alt_bar_helth.png-f185a3b2c0ddaa9f4ad3b6eb0a82ddfd.ctex"]
+source_file="res://Actors/Player/assets/playersprites/PSSCARD.png"
+dest_files=["res://.godot/imported/PSSCARD.png-08c2108202b315d55233002e67b2a85a.ctex"]
 
 [params]
 

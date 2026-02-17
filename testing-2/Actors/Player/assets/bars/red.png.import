@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dt528pyuk6h1f"
-path="res://.godot/imported/bar_helth.png-d63f22da4da1565d7426772b1b870b57.ctex"
+uid="uid://e7wufhi1ikkb"
+path="res://.godot/imported/red.png-b446c694e900e9485c77d48a54958b12.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://UI/assets/bar_helth.png"
-dest_files=["res://.godot/imported/bar_helth.png-d63f22da4da1565d7426772b1b870b57.ctex"]
+source_file="res://Actors/Player/assets/bars/red.png"
+dest_files=["res://.godot/imported/red.png-b446c694e900e9485c77d48a54958b12.ctex"]
 
 [params]
 

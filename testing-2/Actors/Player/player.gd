@@ -18,7 +18,8 @@ extends CharacterBody2D
 
 # === Node References ===
 @export var stamina_bar: TextureProgressBar
-@export var health_bar: TextureProgressBar
+#@export var health_bar: TextureProgressBar
+@export var health_bar: Control
 @export var camera: Camera2D
 @export var sprite: Sprite2D 
 @onready var hurtbox: Hurtbox = get_parent().get_node_or_null("Hurtbox")
@@ -142,7 +143,7 @@ func _physics_process(delta: float) -> void:
 		State.RECOVERY: pass 
 		
 	# Transition: Attack
-	if Input.is_action_just_pressed("attack") and try_deduct_stamina("attack"):
+	if Input.is_action_just_pressed("attack") and not current_state == State.JUMP and try_deduct_stamina("attack"):
 		handle_attack_state(last_move_direction)
 
 
@@ -440,7 +441,7 @@ func update_ui() -> void:
 	if stamina_bar: 
 		stamina_bar.value = stamina
 	if health_bar:
-		health_bar.value = health
+		health_bar.set_value(health)
 
 
 ## Checks if a roll was queued during the previous action.

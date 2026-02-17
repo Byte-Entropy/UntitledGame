@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://8u3b0smijo40"]
 
-[ext_resource type="Texture2D" uid="uid://dcpt1k7igg85t" path="res://UI/assets/bar_stam.png" id="2_2o5uh"]
+[ext_resource type="Texture2D" uid="uid://dcpt1k7igg85t" path="res://UI/assets/PlayerBars/bar_stam.png" id="2_2o5uh"]
 
 [sub_resource type="Gradient" id="Gradient_ne75i"]
 offsets = PackedFloat32Array(0.24093264, 0.48963732, 0.7072539)
@@ -54,7 +54,6 @@ fill_to = Vector2(0, 0)
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=310883858]
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayer" unique_id=1918752546]
-anchors_preset = -1
 offset_left = 120.0
 offset_top = 64.0
 offset_right = 635.0

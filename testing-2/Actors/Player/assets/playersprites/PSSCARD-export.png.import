@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcpt1k7igg85t"
-path="res://.godot/imported/bar_stam.png-7e314f4ea0becb38d83e73840fe51063.ctex"
+uid="uid://co1fvo6qqs7p4"
+path="res://.godot/imported/PSSCARD-export.png-7b7401a66246a9a4a5263cdc282653e8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://UI/assets/bar_stam.png"
-dest_files=["res://.godot/imported/bar_stam.png-7e314f4ea0becb38d83e73840fe51063.ctex"]
+source_file="res://Actors/Player/assets/playersprites/PSSCARD-export.png"
+dest_files=["res://.godot/imported/PSSCARD-export.png-7b7401a66246a9a4a5263cdc282653e8.ctex"]
 
 [params]
 
