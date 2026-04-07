@@ -5,33 +5,32 @@
 [node name="stat_bar" type="Control" unique_id=1740772044]
 custom_minimum_size = Vector2(200, 20)
 layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
+anchor_left = 0.467
 anchor_top = 0.5
-anchor_right = 0.5
+anchor_right = 0.467
 anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -10.0
-offset_right = 100.0
-offset_bottom = 10.0
+offset_left = -635.984
+offset_top = -334.0
+offset_right = -435.984
+offset_bottom = -314.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_kifym")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1917432548]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 200.0
+offset_bottom = 20.0
 color = Color(0, 0, 0, 0.44705883)
 
 [node name="GhostBar" type="TextureProgressBar" parent="." unique_id=319393761]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 200.0
+offset_bottom = 20.0
 
 [node name="RealBar" type="TextureProgressBar" parent="." unique_id=1242128796]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 200.0
+offset_bottom = 20.0
 
 [node name="Delay" type="Timer" parent="." unique_id=1673419492]
